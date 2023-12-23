@@ -25,8 +25,18 @@ int main() {
   //
   BF_Init(LRU);
   int file_desc = createAndPopulateHeapFile(FILE_NAME);
-  sortPhase(file_desc,chunkSize);
-  mergePhases(file_desc,chunkSize,bWay,&fileIterator);
+
+  //here we will try some shits
+  CHUNK_Iterator koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
+
+  for(int i = 0; i < koumparakis.chunkSize; i++)
+  {
+    printf("o kados %d arxizei sto %d kai teleionei sto %d block. Exei sinolika %d block kai %d eggrafes\n",i,koumparakis.chunk[i].from_BlockId,koumparakis.chunk[i].to_BlockId,koumparakis.chunk[i].blocksInChunk,koumparakis.chunk[i].recordsInChunk);
+  }
+
+  // sortPhase(file_desc,chunkSize);
+  // mergePhases(file_desc,chunkSize,bWay,&fileIterator);
+  return 0;
 }
 
 int createAndPopulateHeapFile(char* filename){

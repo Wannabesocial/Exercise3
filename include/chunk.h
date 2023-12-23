@@ -6,21 +6,20 @@
 #include "hp_file.h"
 
 
-/* Represents a chunk of records in a file, defining the file descriptor, starting and ending block IDs, and the counts of records and blocks in the chunk. Useful for managing and sorting records within specific chunks. */
+/* Represents a chunk of records in a file, defining the starting and ending block IDs, and the counts of records and blocks in the chunk. Useful for managing and sorting records within specific chunks. */
 typedef struct {
-    int file_desc;
     int from_BlockId;
     int to_BlockId;
     int recordsInChunk;
     int blocksInChunk;
 } CHUNK;
 
-/* Represents an iterator for traversing chunks within a file, storing the file descriptor, current block, last block ID, and the total number of blocks in each chunk. Useful for efficiently iterating over file chunks.*/
+/* Represents an iterator for traversing chunks within a file using a array of chunks, storing only the file descriptor and the chunk that we are . Useful for efficiently iterating over file chunks.*/
 typedef struct {
     int file_desc;
-    int current;
-    int lastBlocksID;
-    int blocksInChunk;
+    int chunk_index;
+    int chunkSize;
+    CHUNK *chunk;
 } CHUNK_Iterator;
 
 /* Creates a ChunkIterator for efficient traversal of chunks within a file, specified by the file descriptor. The iterator is configured with a defined range of blocks (usually starting from block 1), along with the size of each chunk and the maximum number of records in each block.*/
