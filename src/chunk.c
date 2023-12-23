@@ -46,7 +46,23 @@ CHUNK_Iterator CHUNK_CreateIterator(int fileDesc, int blocksInChunk){
 }
 
 int CHUNK_GetNext(CHUNK_Iterator *iterator,CHUNK* chunk){
+    
+    int CurrentIndex = iterator->chunk_index;
+    
+    //if the cuurent chunk is the last one
+    if(CurrentIndex == iterator->chunkSize)
+    {
+        printf("You are in the last CHUNK!\n");
+        return 1;
+    }
 
+    CHUNK *temp = &iterator->chunk[CurrentIndex];
+    //we copy paste the data from the spesific array to the CHUNK that we return
+    SetCHUNK(temp->from_BlockId,temp->to_BlockId,temp->recordsInChunk,temp->blocksInChunk,chunk);
+
+    //for the next routine
+    iterator->chunk_index++;
+    return 0;
 }
 
 int CHUNK_GetIthRecordInChunk(CHUNK* chunk,  int i, Record* record){

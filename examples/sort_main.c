@@ -28,12 +28,14 @@ int main() {
 
   //here we will try some shits
   CHUNK_Iterator koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
-
-  for(int i = 0; i < koumparakis.chunkSize; i++)
+  CHUNK chunk;
+  //CHUNK_GetNext(&koumparakis,&chunk);
+  for(int i = 0; i < koumparakis.chunkSize+2; i++)
   {
-    printf("o kados %d arxizei sto %d kai teleionei sto %d block. Exei sinolika %d block kai %d eggrafes\n",i,koumparakis.chunk[i].from_BlockId,koumparakis.chunk[i].to_BlockId,koumparakis.chunk[i].blocksInChunk,koumparakis.chunk[i].recordsInChunk);
+    CHUNK_GetNext(&koumparakis,&chunk);
+    printf("CHUCK %d |from %d to %d with %d blocks and %d records|\n",i,chunk.from_BlockId,chunk.to_BlockId,chunk.blocksInChunk,chunk.recordsInChunk);
   }
-
+  
   // sortPhase(file_desc,chunkSize);
   // mergePhases(file_desc,chunkSize,bWay,&fileIterator);
   return 0;
