@@ -8,8 +8,9 @@ CHUNK *ChunkArray = NULL; //Array of CHUNKS (dynamic)
 int chunkArraySize;       //size for the Array of CHUNKS
 
 /*we just sets the values in the chunk*/
-void SetCHUNK(int from_BlockId,int to_BlockId,int recordsInChunk,int blocksInChunk,CHUNK *chunkModifed){
+void SetCHUNK(int file_desc,int from_BlockId,int to_BlockId,int recordsInChunk,int blocksInChunk,CHUNK *chunkModifed){
     
+    chunkModifed->file_desc = file_desc;
     chunkModifed->from_BlockId = from_BlockId;
     chunkModifed->to_BlockId = to_BlockId;
     chunkModifed->blocksInChunk = blocksInChunk;
@@ -39,14 +40,14 @@ CHUNK_Iterator CHUNK_CreateIterator(int fileDesc, int blocksInChunk){
     for(i = 0; i < chunks_to_create-1; i++)
     {
         finishBlockID = startBlockID+blocksInChunk-1;
-        SetCHUNK(startBlockID,finishBlockID,HP_GetMaxRecordsInBlock(fileDesc)*blocksInChunk,blocksInChunk,&ChunkArray[i]);
+        SetCHUNK(fileDesc,startBlockID,finishBlockID,HP_GetMaxRecordsInBlock(fileDesc)*blocksInChunk,blocksInChunk,&ChunkArray[i]);
         startBlockID = finishBlockID+1;
     }
 
     //here we take a specifice care for the last chunk(most propably this has les blocks or records or both)
     blocsInLastChunk = HP_GetIdOfLastBlock(fileDesc) - startBlockID + 1;
     finishBlockID = HP_GetIdOfLastBlock(fileDesc);
-    SetCHUNK(startBlockID,finishBlockID,(blocsInLastChunk-1)*HP_GetMaxRecordsInBlock(fileDesc)+HP_GetRecordCounter(fileDesc,finishBlockID),blocsInLastChunk,&ChunkArray[i]);
+    SetCHUNK(fileDesc,startBlockID,finishBlockID,(blocsInLastChunk-1)*HP_GetMaxRecordsInBlock(fileDesc)+HP_GetRecordCounter(fileDesc,finishBlockID),blocsInLastChunk,&ChunkArray[i]);
     
     //return the chunk iterator
     return chunk_iterator;
@@ -60,16 +61,16 @@ int CHUNK_GetNext(CHUNK_Iterator *iterator,CHUNK* chunk){
     if(CurrentIndex == chunkArraySize)
     {
         printf("You are in the last CHUNK!\n");
-        return 1;
+        return 1; //fail
     }
 
     CHUNK *temp = &ChunkArray[CurrentIndex];
     //we copy paste the data from the spesific array to the CHUNK,so it is not posible to change the CHUNKS,that we return
-    SetCHUNK(temp->from_BlockId,temp->to_BlockId,temp->recordsInChunk,temp->blocksInChunk,chunk);
+    SetCHUNK(temp->file_desc,temp->from_BlockId,temp->to_BlockId,temp->recordsInChunk,temp->blocksInChunk,chunk);
 
     //prepare for the next routine
     iterator->chunk_index++;
-    return 0;
+    return 0; //succes
 }
 
 int CHUNK_GetIthRecordInChunk(CHUNK* chunk,  int i, Record* record){
@@ -81,7 +82,7 @@ int CHUNK_UpdateIthRecord(CHUNK* chunk,  int i, Record record){
 }
 
 void CHUNK_Print(CHUNK chunk){
-
+    
 }
 
 
@@ -90,14 +91,34 @@ CHUNK_RecordIterator CHUNK_CreateRecordIterator(CHUNK *chunk){
     CHUNK_RecordIterator RecordIterator;
 
     //initialize the record iterator
-    SetCHUNK(chunk->from_BlockId,chunk->to_BlockId,chunk->recordsInChunk,chunk->blocksInChunk,&RecordIterator.chunk);
+    SetCHUNK(chunk->file_desc,chunk->from_BlockId,chunk->to_BlockId,chunk->recordsInChunk,chunk->blocksInChunk,&RecordIterator.chunk);
     RecordIterator.currentBlockId = chunk->from_BlockId;
     RecordIterator.cursor = 0;
-
+    
     //return the record iterator
     return RecordIterator;
 }
 
 int CHUNK_GetNextRecord(CHUNK_RecordIterator *iterator,Record* record){
     
+    //if you had in the last call the last record in the last block then error mesege and return 1
+    if(iterator->currentBlockId > iterator->chunk.to_BlockId)
+    {
+        printf("You are uot of records in this CHUNK!\n");
+        return 1; //fail
+    }
+
+    //copy paste the curent record
+    HP_GetRecord(iterator->chunk.file_desc,iterator->currentBlockId,iterator->cursor,record);
+
+    //prepare for the next routine
+    iterator->cursor++;
+
+    //if we were the last record in this block we take the next one(block) (== couse the cursor=0 is the 1st record)
+    if(iterator->cursor == HP_GetRecordCounter(iterator->chunk.file_desc,iterator->currentBlockId))
+    {
+        iterator->currentBlockId++;
+        iterator->cursor = 0; //we start again in the 1st record
+    }
+    return 0; //succes
 }

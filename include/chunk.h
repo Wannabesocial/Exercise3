@@ -8,6 +8,7 @@
 
 /* Represents a chunk of records in a file, defining the starting and ending block IDs, and the counts of records and blocks in the chunk. Useful for managing and sorting records within specific chunks. */
 typedef struct {
+    int file_desc;
     int from_BlockId;
     int to_BlockId;
     int recordsInChunk;
@@ -47,7 +48,7 @@ typedef struct CHUNK_RecordIterator {
 CHUNK_RecordIterator CHUNK_CreateRecordIterator(CHUNK *chunk);
 
 
-/* Function to get the next record from the iterator. */
+/* Function to get the next record from the iterator.(IMPORTANT)At the start this return the 1st record in the curent CHUNK */
 int CHUNK_GetNextRecord(CHUNK_RecordIterator *iterator,Record* record);
 
 
