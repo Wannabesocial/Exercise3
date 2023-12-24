@@ -29,18 +29,10 @@ int main() {
   //here we will try some shits
   CHUNK_Iterator koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
   CHUNK chunk;
-  Record record;
   CHUNK_GetNext(&koumparakis,&chunk);
-  CHUNK_RecordIterator read = CHUNK_CreateRecordIterator(&chunk);
+  
+  CHUNK_Print(chunk);
 
-
-  printf("The CHUNK start in %d and end in %d blockID\n",read.chunk.from_BlockId,read.chunk.to_BlockId);
-
-  for(int i = 0; i < read.chunk.recordsInChunk; i++)
-  {
-    CHUNK_GetNextRecord(&read,&record);
-    printf("%d,%s,%s,%s\n",record.id,record.city,record.name,record.surname);
-  }
   
   // sortPhase(file_desc,chunkSize);
   // mergePhases(file_desc,chunkSize,bWay,&fileIterator);

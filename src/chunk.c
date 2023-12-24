@@ -3,6 +3,7 @@
 #include <math.h> //floor(double) function
 #include "chunk.h"
 
+#define FIELD_WIDTH 15
 
 CHUNK *ChunkArray = NULL; //Array of CHUNKS (dynamic)
 int chunkArraySize;       //size for the Array of CHUNKS
@@ -82,7 +83,21 @@ int CHUNK_UpdateIthRecord(CHUNK* chunk,  int i, Record record){
 }
 
 void CHUNK_Print(CHUNK chunk){
-    
+
+    //creat a Record Iterator so we can travel throght records
+    CHUNK_RecordIterator RecordIterator = CHUNK_CreateRecordIterator(&chunk);
+
+    Record record;
+
+    printf("+----+---------------+---------------+---------------+\n");
+    printf("|%-*s|%-*s|%-*s|%-*s|\n",4,"ID",FIELD_WIDTH, "NAME", FIELD_WIDTH, "SURNAME", FIELD_WIDTH, "CITY");
+    printf("+----+---------------+---------------+---------------+\n");
+    for(int i = 0; i < RecordIterator.chunk.recordsInChunk; i++)
+    {
+        CHUNK_GetNextRecord(&RecordIterator,&record);
+        printf("|%-*d|%-*s|%-*s|%-*s|\n",4,record.id,FIELD_WIDTH,record.name,FIELD_WIDTH,record.surname,FIELD_WIDTH,record.city);
+    }
+    printf("+----+---------------+---------------+---------------+\n");
 }
 
 
