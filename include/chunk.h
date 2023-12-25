@@ -27,14 +27,14 @@ CHUNK_Iterator CHUNK_CreateIterator(int fileDesc, int blocksInChunk);
 /* Retrieves the next CHUNK in the sequence as per the provided CHUNK_Iterator.(IMPORTANT)At the start this return the CHUNK[0] */
 int CHUNK_GetNext(CHUNK_Iterator *iterator,CHUNK* chunk);
 
-/* Retrieves the ith record from a CHUNK of blocks in a heap file. Returns 0 if successful, populating the 'record' parameter; otherwise, -1. Assumes sequential ordering of records within the chunk.*/
+/* Retrieves the ith record from a CHUNK of blocks in a heap file. Returns 0 if successful, populating the 'record' parameter; otherwise, -1. Assumes sequential ordering of records within the chunk.(we asume that if i=1 this is the Record 0(the first record(cursor=0)))*/
 int CHUNK_GetIthRecordInChunk(CHUNK* chunk,  int i, Record* record);//
 
 /* Updates the ith record in a chunk. Returns 0 if successful; -1 if unsuccessful. Facilitates efficient and controlled updates within a chunk.*/
 int CHUNK_UpdateIthRecord(CHUNK* chunk,  int i, Record record);//
 
 /* This function is used to print the records within a chunk.*/
-void CHUNK_Print(CHUNK chunk);//
+void CHUNK_Print(CHUNK chunk);
 
 
 /* Iterates through records in a CHUNK, encapsulating the id of the current block and a cursor in that block. */
@@ -50,6 +50,10 @@ CHUNK_RecordIterator CHUNK_CreateRecordIterator(CHUNK *chunk);
 
 /* Function to get the next record from the iterator.(IMPORTANT)At the start this return the 1st record in the curent CHUNK */
 int CHUNK_GetNextRecord(CHUNK_RecordIterator *iterator,Record* record);
+
+
+//my functions
+int Arraysize();
 
 
 

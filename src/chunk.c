@@ -4,9 +4,13 @@
 #include "chunk.h"
 
 #define FIELD_WIDTH 15
+#define ID_WIDTH 6
 
 CHUNK *ChunkArray = NULL; //Array of CHUNKS (dynamic)
-int chunkArraySize;       //size for the Array of CHUNKS
+int chunkArraySize = 0; //size for the Array of CHUNKS
+
+//tururn the numbers of CHUNKS that i have made
+int Arraysize(){return chunkArraySize;}
 
 /*we just sets the values in the chunk*/
 void SetCHUNK(int file_desc,int from_BlockId,int to_BlockId,int recordsInChunk,int blocksInChunk,CHUNK *chunkModifed){
@@ -76,6 +80,21 @@ int CHUNK_GetNext(CHUNK_Iterator *iterator,CHUNK* chunk){
 
 int CHUNK_GetIthRecordInChunk(CHUNK* chunk,  int i, Record* record){
 
+    //create a Record Iterator so we can easyly find the ith record
+    CHUNK_RecordIterator RecordIterator = CHUNK_CreateRecordIterator(chunk);
+
+    //if the record you want to take is out of this CHUNK
+    if(i > RecordIterator.chunk.recordsInChunk)
+    {
+        printf("This record is out of this CHUNK.Here exist only %d records\n",RecordIterator.chunk.recordsInChunk);
+        return 1; //fail
+    }
+
+    //we find the ith Record in the CHUNK
+    //we must find the blockID in the CHUNK that have the Record
+    
+
+    return 0;//succes
 }
 
 int CHUNK_UpdateIthRecord(CHUNK* chunk,  int i, Record record){
@@ -86,20 +105,24 @@ void CHUNK_Print(CHUNK chunk){
 
     //creat a Record Iterator so we can travel throght records
     CHUNK_RecordIterator RecordIterator = CHUNK_CreateRecordIterator(&chunk);
+    CHUNK temp = RecordIterator.chunk;
 
     Record record;
 
-    printf("+----+---------------+---------------+---------------+\n");
-    printf("|%-*s|%-*s|%-*s|%-*s|\n",4,"ID",FIELD_WIDTH, "NAME", FIELD_WIDTH, "SURNAME", FIELD_WIDTH, "CITY");
-    printf("+----+---------------+---------------+---------------+\n");
+    //print some data for the current CHUNK
+    printf("\nCHUNK detailes:StartID=%d,LastID=%d,TotalBlocks=%d,TotalRecords=%d\n",temp.from_BlockId,temp.to_BlockId,temp.blocksInChunk,temp.recordsInChunk);
+
+    //print nicely the data for the current CHUNK
+    printf("+------+---------------+---------------+---------------+\n");
+    printf("|%-*s|%-*s|%-*s|%-*s|\n",ID_WIDTH,"ID",FIELD_WIDTH, "NAME", FIELD_WIDTH, "SURNAME", FIELD_WIDTH, "CITY");
+    printf("+------+---------------+---------------+---------------+\n");
     for(int i = 0; i < RecordIterator.chunk.recordsInChunk; i++)
     {
         CHUNK_GetNextRecord(&RecordIterator,&record);
-        printf("|%-*d|%-*s|%-*s|%-*s|\n",4,record.id,FIELD_WIDTH,record.name,FIELD_WIDTH,record.surname,FIELD_WIDTH,record.city);
+        printf("|%-*d|%-*s|%-*s|%-*s|\n",ID_WIDTH,record.id,FIELD_WIDTH,record.name,FIELD_WIDTH,record.surname,FIELD_WIDTH,record.city);
     }
-    printf("+----+---------------+---------------+---------------+\n");
+    printf("+------+---------------+---------------+---------------+\n");
 }
-
 
 CHUNK_RecordIterator CHUNK_CreateRecordIterator(CHUNK *chunk){
     //create a record iterator
@@ -132,6 +155,9 @@ int CHUNK_GetNextRecord(CHUNK_RecordIterator *iterator,Record* record){
     //if we were the last record in this block we take the next one(block) (== couse the cursor=0 is the 1st record)
     if(iterator->cursor == HP_GetRecordCounter(iterator->chunk.file_desc,iterator->currentBlockId))
     {
+        //unpin the block that we used before we take the next one
+        HP_Unpin(iterator->chunk.file_desc,iterator->currentBlockId);
+
         iterator->currentBlockId++;
         iterator->cursor = 0; //we start again in the 1st record
     }

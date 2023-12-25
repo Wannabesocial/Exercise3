@@ -29,9 +29,12 @@ int main() {
   //here we will try some shits
   CHUNK_Iterator koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
   CHUNK chunk;
-  CHUNK_GetNext(&koumparakis,&chunk);
-  
-  CHUNK_Print(chunk);
+
+  // for(int i = 0; i < Arraysize(); i++)
+  // {
+    CHUNK_GetNext(&koumparakis,&chunk);
+    CHUNK_Print(chunk);
+  //}
 
   
   // sortPhase(file_desc,chunkSize);
