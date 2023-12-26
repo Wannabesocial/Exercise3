@@ -29,14 +29,26 @@ int main() {
   //here we will try some shits
   CHUNK_Iterator koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
   CHUNK chunk;
+  Record record;
+
+  char name[15] = "MALARIOS",surname[15] = "POUTSARAS",city[15] = "KOS",delimiter[2] = "\n";
+  strcpy(record.name,name);
+  strcpy(record.surname,surname);
+  strcpy(record.city,city);
+  strcpy(record.delimiter,delimiter);
+
+  record.id = 100;
+  
 
   // for(int i = 0; i < Arraysize(); i++)
   // {
     CHUNK_GetNext(&koumparakis,&chunk);
     CHUNK_Print(chunk);
   //}
-
+  CHUNK_UpdateIthRecord(&chunk,40,record);
+  CHUNK_Print(chunk);
   
+
   // sortPhase(file_desc,chunkSize);
   // mergePhases(file_desc,chunkSize,bWay,&fileIterator);
   return 0;

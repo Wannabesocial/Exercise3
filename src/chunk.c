@@ -80,25 +80,44 @@ int CHUNK_GetNext(CHUNK_Iterator *iterator,CHUNK* chunk){
 
 int CHUNK_GetIthRecordInChunk(CHUNK* chunk,  int i, Record* record){
 
-    //create a Record Iterator so we can easyly find the ith record
-    CHUNK_RecordIterator RecordIterator = CHUNK_CreateRecordIterator(chunk);
-
     //if the record you want to take is out of this CHUNK
-    if(i > RecordIterator.chunk.recordsInChunk)
+    if(i > chunk->recordsInChunk || i <= 0)
     {
-        printf("This record is out of this CHUNK.Here exist only %d records\n",RecordIterator.chunk.recordsInChunk);
+        printf("This record is out of this CHUNK.Here exist only %d records\n",chunk->recordsInChunk);
         return 1; //fail
     }
 
-    //we find the ith Record in the CHUNK
-    //we must find the blockID in the CHUNK that have the Record
-    
+    //we find the blockID in the CHUNK that have the Record
+    int blockID_with_Record = (i-1)/HP_GetMaxRecordsInBlock(chunk->file_desc) + chunk->from_BlockId;
+
+    //we find the spesific record place in the BLOCK
+    int Record_Potition = (i-1) - (blockID_with_Record - chunk->from_BlockId) * HP_GetMaxRecordsInBlock(chunk->file_desc);
+
+    //we take the record and Unpin the Block
+    HP_GetRecord(chunk->file_desc,blockID_with_Record,Record_Potition,record);
+    HP_Unpin(chunk->file_desc,blockID_with_Record);
 
     return 0;//succes
 }
 
 int CHUNK_UpdateIthRecord(CHUNK* chunk,  int i, Record record){
 
+    //if the record you want to take is out of this CHUNK
+    if(i > chunk->recordsInChunk || i <= 0)
+    {
+        printf("This record is out of this CHUNK.Here exist only %d records\n",chunk->recordsInChunk);
+        return 1; //fail
+    }
+
+    //we find the blockID in the CHUNK that have the Record
+    int blockID_with_Record = (i-1)/HP_GetMaxRecordsInBlock(chunk->file_desc) + chunk->from_BlockId;
+
+    //we find the spesific record place in the BLOCK
+    int Record_Potition = (i-1) - (blockID_with_Record - chunk->from_BlockId) * HP_GetMaxRecordsInBlock(chunk->file_desc);
+
+    //we set the record and Unpin the Block
+    HP_UpdateRecord(chunk->file_desc,blockID_with_Record,Record_Potition,record);
+    HP_Unpin(chunk->file_desc,blockID_with_Record);
 }
 
 void CHUNK_Print(CHUNK chunk){
@@ -106,7 +125,7 @@ void CHUNK_Print(CHUNK chunk){
     //creat a Record Iterator so we can travel throght records
     CHUNK_RecordIterator RecordIterator = CHUNK_CreateRecordIterator(&chunk);
     CHUNK temp = RecordIterator.chunk;
-
+    bool flag;
     Record record;
 
     //print some data for the current CHUNK
@@ -117,11 +136,18 @@ void CHUNK_Print(CHUNK chunk){
     printf("|%-*s|%-*s|%-*s|%-*s|\n",ID_WIDTH,"ID",FIELD_WIDTH, "NAME", FIELD_WIDTH, "SURNAME", FIELD_WIDTH, "CITY");
     printf("+------+---------------+---------------+---------------+\n");
     for(int i = 0; i < RecordIterator.chunk.recordsInChunk; i++)
-    {
+    {   
+        flag = false;
         CHUNK_GetNextRecord(&RecordIterator,&record);
         printf("|%-*d|%-*s|%-*s|%-*s|\n",ID_WIDTH,record.id,FIELD_WIDTH,record.name,FIELD_WIDTH,record.surname,FIELD_WIDTH,record.city);
+        if((i+1) % HP_GetMaxRecordsInBlock(chunk.file_desc) == 0)
+        {
+            flag = true;
+            printf("+------+---------------+---------------+---------------+\n");
+        }
     }
-    printf("+------+---------------+---------------+---------------+\n");
+    if(flag == false)
+        printf("+------+---------------+---------------+---------------+\n");
 }
 
 CHUNK_RecordIterator CHUNK_CreateRecordIterator(CHUNK *chunk){
