@@ -29,24 +29,9 @@ int main() {
   //here we will try some shits
   CHUNK_Iterator koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
   CHUNK chunk;
-  Record record;
-
-  char name[15] = "MALARIOS",surname[15] = "POUTSARAS",city[15] = "KOS",delimiter[2] = "\n";
-  strcpy(record.name,name);
-  strcpy(record.surname,surname);
-  strcpy(record.city,city);
-  strcpy(record.delimiter,delimiter);
-
-  record.id = 100;
   
 
-  // for(int i = 0; i < Arraysize(); i++)
-  // {
-    CHUNK_GetNext(&koumparakis,&chunk);
-    CHUNK_Print(chunk);
-  //}
-  CHUNK_UpdateIthRecord(&chunk,40,record);
-  CHUNK_Print(chunk);
+  CHUNK_GetNext(&koumparakis,&chunk);
   
 
   sortPhase(file_desc,chunkSize);
@@ -54,7 +39,25 @@ int main() {
   {
     CHUNK_Print(chunk);
   }
-  // mergePhases(file_desc,chunkSize,bWay,&fileIterator);
+
+  printf("\n\n\n mergeignggrg \n\n\n");
+  
+  mergePhases(file_desc,chunkSize,bWay,&fileIterator);
+  koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
+  CHUNK_GetNext(&koumparakis,&chunk);
+  int outFileDesc;
+  char outFileName[50];
+  sprintf(outFileName, "%s%d.db", "out", fileIterator - 1); // Assuming fileIterator is the count of output files
+  HP_OpenFile(outFileName, &outFileDesc);
+
+    // Print all entries in the "out.db" file
+  HP_PrintAllEntries(outFileDesc);
+  
+  for(int i = 0; i < Arraysize(); i++)
+  {
+    CHUNK_Print(chunk);
+  }
+  
   return 0;
 }
 
@@ -89,6 +92,7 @@ void mergePhases(int inputFileDesc,int chunkSize,int bWay, int* fileCounter){
     chunkSize*=bWay;
     inputFileDesc = oututFileDesc;
   }
+
   HP_CloseFile(oututFileDesc);
 }
 
