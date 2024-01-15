@@ -55,7 +55,8 @@ int CHUNK_GetNextRecord(CHUNK_RecordIterator *iterator,Record* record);
 //my functions
 int Arraysize();
 
-
+/*αν δεν εχει διαγραφει ο πινακας με τα chunks τα διαγραφει(ΠΡΕΠΕΙ ΝΑ ΚΑΛΕΙΤΕ ΠΑΝΤΑ ΣΤΟ ΤΕΛΟΣ ΤΗΣ ΜΑΙΝ)*/
+void Delete_Chunk_Array();
 
 
 #endif  // MY_HEADER_H

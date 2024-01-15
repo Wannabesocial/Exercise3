@@ -12,6 +12,12 @@ int chunkArraySize = 0; //size for the Array of CHUNKS
 //tururn the numbers of CHUNKS that i have made
 int Arraysize(){return chunkArraySize;}
 
+//free the array of chunks if it not
+void Delete_Chunk_Array()
+{
+    if(ChunkArray != NULL) free(ChunkArray);
+}
+
 /*we just sets the values in the chunk*/
 void SetCHUNK(int file_desc,int from_BlockId,int to_BlockId,int recordsInChunk,int blocksInChunk,CHUNK *chunkModifed){
     

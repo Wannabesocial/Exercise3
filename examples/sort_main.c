@@ -45,6 +45,8 @@ int main() {
   }
   HP_CloseFile(arxeio_dis);
 
+  Delete_Chunk_Array();
+
   return 0;
 }
 
