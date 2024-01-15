@@ -3,7 +3,7 @@
 #include <string.h>
 #include "merge.h"
 
-#define RECORDS_NUM 500 // you can change it if you want
+#define RECORDS_NUM 500// you can change it if you want
 #define FILE_NAME "data.db"
 #define OUT_NAME "out"
 
@@ -33,11 +33,11 @@ int main() {
   sortPhase(file_desc,chunkSize);
  
   mergePhases(file_desc,chunkSize,bWay,&fileIterator);
-  int arxeio_dis;
+  int arxeio_dis,blocks_per_chucks = 20; //defoult
   printf("Onoma teleikou out = %s",arxeio);
 
   HP_OpenFile(arxeio,&arxeio_dis);
-  itterator = CHUNK_CreateIterator(arxeio_dis,chunkSize);//στο chunkSize μπορειτε να βαλετε οτι αριθμο θελετε  
+  itterator = CHUNK_CreateIterator(arxeio_dis,blocks_per_chucks);//στο chunkSize μπορειτε να βαλετε οτι αριθμο θελετε(απλα αλαξει τον τροπο που εκτειπονει)
   for(int i = 0; i < Arraysize(); i++)
   {
     CHUNK_GetNext(&itterator,&chunk);
