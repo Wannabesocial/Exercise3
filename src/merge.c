@@ -6,34 +6,56 @@
 #include "record.h"
 #include "bf.h"
 #include "hp_file.h"
+#include "sort.h"
 
+#define NOT_FOUND -1
+#define OUT_OF_RECORDS -2
+#define YES -3
 
-
-void Init_Record_Iterators(int size,CHUNK_Iterator iterator,int current_loop)
+bool IsEmpty(Record *record,int size)
 {
-    CHUNK chunk;
-
-    //we must go in the number of chunk so we initilize right
-    
-
+    for(int i = 0; i < size; i++)
+        if(record[i].id != NOT_FOUND)
+            return false;
+    return true;
 }
 
-CHUNK_RecordIterator *Create_Record_Iterators(int bWay,int number_of_chunk_in_file,int loop_number,int loops_to_merge,int *size)
+Record findSmallestRecord(Record *records, int numRecords)
 {
-    CHUNK_RecordIterator *record_iterator;
+    Record smallestRecord;
+    int smallestRecord_position;
 
-    //if we are in the last loop we must make less record iterator /else we use the defoult
-    int iterators_to_create = (loop_number == loops_to_merge-1) ? number_of_chunk_in_file - (bWay * loops_to_merge) : bWay;
-    *size = iterators_to_create;
+    for(int i = 0; i < numRecords; i++)
+    {
+        if(records[i].id != NOT_FOUND)
+        {
+            smallestRecord = records[i];
+            smallestRecord_position = i;
+            break;
+        }
+    }
+    
+    for (int j = 0; j < numRecords; j++)
+    {   
+        if(records[j].id == NOT_FOUND)
+            continue;
 
-    record_iterator = malloc(sizeof(CHUNK_RecordIterator) * iterators_to_create);
+        if (shouldSwap(&smallestRecord, &records[j]))
+        {
+            smallestRecord = records[j];
+            smallestRecord_position = j;
+        }
+    }
 
-    return record_iterator;
+    records[smallestRecord_position].id = NOT_FOUND;
+
+    return smallestRecord;
 }
 
 
 void merge(int file_desc, int chunkSize, int bWay, int output_fd) {
     
+
     //we create a chunk iterator so we make the chunks with the data
     CHUNK_Iterator iterator = CHUNK_CreateIterator(file_desc,chunkSize);
     CHUNK inputChunk;
@@ -41,27 +63,59 @@ void merge(int file_desc, int chunkSize, int bWay, int output_fd) {
     //find out how many loops we must do to merge using at most bWay chunks per time
     double estimate_loops =  Arraysize() / (double)bWay;
     int loops_to_merge = (int)(floor(estimate_loops) == estimate_loops) ? estimate_loops : estimate_loops + 1;
-    int size;
+    int size = bWay;
 
     //we use a array of record itaratos (one for every chunk)
-    CHUNK_RecordIterator *record_iterator = NULL;
-    
+    CHUNK_RecordIterator record_iterator[size];
+    Record records[size];
+    int Records_In_Chunks[size];
+
     //here we start the merge algorith based on the loops we calculate earlyer
     for(int i = 0; i < loops_to_merge; i++)
     {
-        free(record_iterator);
-        record_iterator = NULL;
-        record_iterator = Create_Record_Iterators(bWay,Arraysize(),i,loops_to_merge,&size);
+        //last loop
+        if(i == loops_to_merge-1)
+        {
+            //we must store the right size for the leftovers
+            size = Arraysize() - (bWay * i);
+        }
+        
+        for(int j = 0; j < size; j++)
+        {
+            //init the array with the records
+            records[j].id = NOT_FOUND;
 
-        //we initilize the records iterators with the right data
-        Init_Record_Iterators(size,iterator,i+1);
+            //init the itereators
+            CHUNK_GetNext(&iterator,&inputChunk);
+            record_iterator[j] = CHUNK_CreateRecordIterator(&inputChunk);
 
+            Records_In_Chunks[j] = YES;
+        }
 
+        while(true)
+        {
+            //in array for every record that has no actuall record (take the next one)
+            for(int i = 0; i < size; i++)
+            {
+                if(records[i].id == NOT_FOUND && Records_In_Chunks[i] == YES)
+                {
+                    if(CHUNK_GetNextRecord(&record_iterator[i],&records[i]) == 1)
+                    {
+                        records[i].id == NOT_FOUND;
+                        Records_In_Chunks[i] = OUT_OF_RECORDS;
+                    }
+                }
+                
+            }
+            
+            //if we store all the records in the new file
+            if(IsEmpty(records,size))
+                break;
+
+            //the array of records is not empty so we can go and insert in the new file the lowest record
+            HP_InsertEntry(output_fd,findSmallestRecord(records,size));
+        }
     }
-
-    if(record_iterator != NULL)
-        free(record_iterator);
-
 }
 
 

@@ -21,8 +21,21 @@ void sort_FileInChunks(int file_desc, int numBlocksInChunk) {
     CHUNK_Iterator iterator = CHUNK_CreateIterator(file_desc, numBlocksInChunk);//create iterator for chunks
     CHUNK chunk;
 
-    while (CHUNK_GetNext(&iterator, &chunk) == 0) {//while there are chunks
+    // Get the total number of chunks
+    int totalChunks = Arraysize();
+
+    // Iterate through chunks
+    for (int chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        // Get the current chunk
+        CHUNK_GetNext(&iterator, &chunk);
+
+        // Sort the current chunk
         sort_Chunk(&chunk);
+
+        // If it's the last chunk, break from the loop
+        if (chunkIndex == totalChunks - 1) {
+            break;
+        }
     }
 }
 void sort_Chunk(CHUNK* chunk) {

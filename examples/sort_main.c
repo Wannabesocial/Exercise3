@@ -8,7 +8,7 @@
 #define OUT_NAME "out"
 
 
-
+char arxeio[100];
 
 int createAndPopulateHeapFile(char* filename);
 
@@ -31,12 +31,20 @@ int main() {
   CHUNK chunk;
 
   sortPhase(file_desc,chunkSize);
-  // for(int i = 0; i < Arraysize(); i++)
-  // {
-  //   CHUNK_GetNext(&koumparakis,&chunk);
-  //   CHUNK_Print(chunk);
-  // }
+ 
   mergePhases(file_desc,chunkSize,bWay,&fileIterator);
+  int arxeio_dis;
+  printf("Onoma teleikou out = %s",arxeio);
+
+  HP_OpenFile(arxeio,&arxeio_dis);
+  koumparakis = CHUNK_CreateIterator(arxeio_dis,chunkSize);
+  for(int i = 0; i < Arraysize(); i++)
+  {
+    CHUNK_GetNext(&koumparakis,&chunk);
+    CHUNK_Print(chunk);
+  }
+  HP_CloseFile(arxeio_dis);
+
   return 0;
 }
 
@@ -64,13 +72,13 @@ void sortPhase(int file_desc,int chunkSize){
 /* Performs the merge phase of the external merge sort algorithm  using chunks of size 'chunkSize' and 'bWay' merging. The merge phase may be performed in more than one cycles.*/
 void mergePhases(int inputFileDesc,int chunkSize,int bWay, int* fileCounter){
   int oututFileDesc;
-  //while(chunkSize<=HP_GetIdOfLastBlock(inputFileDesc)){
+  while(chunkSize<=HP_GetIdOfLastBlock(inputFileDesc)){
     oututFileDesc =   nextOutputFile(fileCounter);
     merge(inputFileDesc, chunkSize, bWay, oututFileDesc );
     HP_CloseFile(inputFileDesc);
     chunkSize*=bWay;
     inputFileDesc = oututFileDesc;
-  //}
+  }
   HP_CloseFile(oututFileDesc);
 }
 
@@ -82,5 +90,8 @@ int nextOutputFile(int* fileCounter){
     int file_desc;
     HP_CreateFile(mergedFile);
     HP_OpenFile(mergedFile, &file_desc);
+
+    strcpy(arxeio,mergedFile);
+
     return file_desc;
 }
