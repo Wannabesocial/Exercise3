@@ -27,7 +27,7 @@ int main() {
   int file_desc = createAndPopulateHeapFile(FILE_NAME);
 
   //here we will try some shits
-  CHUNK_Iterator koumparakis = CHUNK_CreateIterator(file_desc,chunkSize);
+  CHUNK_Iterator itterator = CHUNK_CreateIterator(file_desc,chunkSize);
   CHUNK chunk;
 
   sortPhase(file_desc,chunkSize);
@@ -37,10 +37,10 @@ int main() {
   printf("Onoma teleikou out = %s",arxeio);
 
   HP_OpenFile(arxeio,&arxeio_dis);
-  koumparakis = CHUNK_CreateIterator(arxeio_dis,chunkSize);
+  itterator = CHUNK_CreateIterator(arxeio_dis,chunkSize);//στο chunkSize μπορειτε να βαλετε οτι αριθμο θελετε  
   for(int i = 0; i < Arraysize(); i++)
   {
-    CHUNK_GetNext(&koumparakis,&chunk);
+    CHUNK_GetNext(&itterator,&chunk);
     CHUNK_Print(chunk);
   }
   HP_CloseFile(arxeio_dis);
